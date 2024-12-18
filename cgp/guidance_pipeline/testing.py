@@ -203,7 +203,7 @@ prompt = "Change file ownership, group and permissions"
 if "llama" in model_name:
   print("adding shots")
   prompt = shots + "\n" + prompt
-obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "ansible.builtin.file", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
+obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "[ansible.builtin.file, ansible.builtin.command]", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
 pred_structure = obj()
 
 if "{{ge" in pred_structure:
