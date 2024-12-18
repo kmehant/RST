@@ -199,29 +199,28 @@ guidance.library._geneach.select_generated_id = {}
 guidance.library._geneach.iterator = None
 guidance.library._geneach.cur_iteration = None
 pred_structure = ""
-try:
-    prompt = "Change file ownership, group and permissions"
-    if "llama" in model_name:
-      print("adding shots")
-      prompt = shots + "\n" + prompt
-    obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "ansible.builtin.file", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
-    pred_structure = obj()
+prompt = "Change file ownership, group and permissions"
+if "llama" in model_name:
+  print("adding shots")
+  prompt = shots + "\n" + prompt
+obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "ansible.builtin.file", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
+pred_structure = obj()
 
-    if "{{ge" in pred_structure:
-        end_ind = pred_structure.find("{{ge")
-        pred_structure = pred_structure[:end_ind]
-    pred_structure = pred_structure.rstrip()
-    print(str(pred_structure))
-    # output.append(ir_data_jsonl[i])
+if "{{ge" in pred_structure:
+    end_ind = pred_structure.find("{{ge")
+    pred_structure = pred_structure[:end_ind]
+pred_structure = pred_structure.rstrip()
+print(str(pred_structure))
+# output.append(ir_data_jsonl[i])
 #   f.write(pred_structure)
 #   f.write("-----------------------------------------") 
-    print("done")
-except Exception as e:
-  print("failed")
-  print(e)
-  # ir_data_jsonl[i]["output"] = str("")
-  # output.append(ir_data_jsonl[i])
-  cnt_invalid += 1
+print("done")
+# except Exception as e:
+#   print("failed")
+#   print(e)
+#   # ir_data_jsonl[i]["output"] = str("")
+#   # output.append(ir_data_jsonl[i])
+#   cnt_invalid += 1
   # continue
 # df_out = pd.DataFrame(output)
 # df_out.to_parquet(output_file)
