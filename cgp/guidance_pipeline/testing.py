@@ -199,7 +199,7 @@ guidance.library._geneach.select_generated_id = {}
 guidance.library._geneach.iterator = None
 guidance.library._geneach.cur_iteration = None
 pred_structure = ""
-prompt = "Change file ownership, group and permissions"
+prompt = "- name: Change file ownership, group and permissions"
 if "llama" in model_name:
   print("adding shots")
   prompt = shots + "\n" + prompt
