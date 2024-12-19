@@ -159,31 +159,6 @@ class nl2structure:
 cnt_invalid = 0
 # output = []
 
-shots = """- name: configure syslog file replace
-  netconf_config:
-    content: "{{ syslog_config_replace }}"
-    default_operation: 'replace'
-  register: result
-
-- assert:
-    that:
-      - "result.changed == true"
-
-- name: Get guest identity information
-  vmware.vmware_rest.vcenter_vm_guest_identity_info:
-    vm: '{{ test_vm1_info.id }}'
-  register: _result
-
-
-name: Merge provided NTP configuration into running configuration.
-junipernetworks.junos.junos_routing_options:
-  config:
-    autonomous_system:
-      as_number: 2
-      asdot_notation: true
-  state: merged
-"""
-
 guidance.llms.Transformers.cache.clear()
 guidance.library._gen.cnt = 0
 guidance.library._gen.end_indent_flag = 0
@@ -200,12 +175,9 @@ guidance.library._geneach.iterator = None
 guidance.library._geneach.cur_iteration = None
 pred_structure = ""
 prompt = "- name: Change file ownership, group and permissions"
-if "llama" in model_name:
-  print("adding shots")
-  prompt = shots + "\n" + prompt
 obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "['ansible.builtin.file', 'ansible.builtin.command']", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
 pred_structure = obj()
-
+print(str(pred_structure))
 if "{{ge" in pred_structure:
     end_ind = pred_structure.find("{{ge")
     pred_structure = pred_structure[:end_ind]
