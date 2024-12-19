@@ -177,7 +177,6 @@ pred_structure = ""
 prompt = "- name: Change file ownership, group and permissions"
 obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "['ansible.builtin.file', 'ansible.builtin.command']", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
 pred_structure = obj()
-print(str(pred_structure))
 if "{{ge" in pred_structure:
     end_ind = pred_structure.find("{{ge")
     pred_structure = pred_structure[:end_ind]
