@@ -1,12 +1,8 @@
 import guidance
 import json
-import transformers
 import sys
 from transformers import AutoTokenizer, AutoModelForCausalLM
-import pandas as pd
 import torch
-from tqdm import tqdm
-import time
 
 
 def cnt_spaces_left(text):
@@ -14,9 +10,9 @@ def cnt_spaces_left(text):
 
 model = sys.argv[1]
 model_name = model
-# dataset = sys.argv[2]
-# output_file = sys.argv[3]
-# colbert_top = sys.argv[4]
+prompt = sys.argv[2]
+modules = sys.argv[3]
+
 
 tokenizer = AutoTokenizer.from_pretrained(model)
 model_base = AutoModelForCausalLM.from_pretrained(model, torch_dtype=torch.float16, device_map="auto")
@@ -45,7 +41,7 @@ class nl2structure:
         self.token_healing = token_healing
         self.model = guidance.llms.Transformers(model=model_base, tokenizer=self.tokenizer)
         global contents
-#         guidance.llm = guidance.llms.transformers.MPTChat(model=model,tokenizer=self.tokenizer)
+
 
 
     def return_required_keys(self, contents):
@@ -121,18 +117,13 @@ class nl2structure:
           if self.task == "ansible_yaml":
             module_line = self.prompt.split("\n")[-1]
             module_spaces = " "*(cnt_spaces_left(self.prompt) + 2)
-            # if self.prompt.startswith("name"):
-            #   module_spaces = ""
-            # else:
-            #   module_spaces = " "*(cnt_spaces_left(self.prompt) + 2)
             module_selection_prompt  = self.prompt + "\n" + module_spaces + """{{select "module" options=module_list cmd_name=True}}:"""
             self.reference_module = eval(self.reference_module)
             guidance.llms.Transformers.cache.clear()
 
             prog_module = guidance(module_selection_prompt, token_healing=self.token_healing, llm=self.model)
             module_opt = prog_module(module_list=self.reference_module)
-            # print(module_opt)
-            # print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
 
             self.reference_module = guidance.library._select.selected_module
             guidance.library._select.selected_module = None
@@ -144,20 +135,15 @@ class nl2structure:
             regex_pattern = ".*\n\s{" + str(cnt_spaces_left(self.prompt) + 3) + "}$"    #regex pattern and it's corresponding template to change.
             # regex_pattern = ".*\n    $"                                                                       #for ansible we need regex pattern for level 1 keys. Which is 2 more spaces than module name line
             options_available = {regex_pattern: self.template}
-      # options_available = None
+
             
       optional_required_nested_keys, optional_optional_nested_keys = self.return_nested_for_optional(contents, optional_keys + list(required_keys.keys()), self.reference_module)
 
       task_details = {"schema_path": self.schema, "task": self.task, "module_name": self.reference_module, "options_available": options_available, "required_keys": required_keys, "optional_keys": optional_keys, "optional_optional_nested_keys": optional_optional_nested_keys, "optional_required_nested_keys": optional_required_nested_keys}
-      # print(options_available)
+
       prog1 = guidance(final_prompt, token_healing=self.token_healing, module=self.reference_module, options=options_available, schema=self.schema, task_config=task_details, llm=self.model)
       out = prog1(options_available=options_available, unique=[1], id=1)
       return(str(out))
-
-# ir_data_df = pd.read_parquet(dataset)
-# ir_data_jsonl = ir_data_df.to_dict(orient="records")
-cnt_invalid = 0
-# output = []
 
 guidance.llms.Transformers.cache.clear()
 guidance.library._gen.cnt = 0
@@ -174,26 +160,13 @@ guidance.library._geneach.select_generated_id = {}
 guidance.library._geneach.iterator = None
 guidance.library._geneach.cur_iteration = None
 pred_structure = ""
-prompt = "- name: configure aws s3 account on ibm spectrum"
-obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "['ibm.spectrum_virtualize.ibm_sv_manage_awss3_cloudaccount', 'ansible.builtin.file']", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
+# prompt = "- name: configure aws s3 account on ibm spectrum"
+# modules = "['ibm.spectrum_virtualize.ibm_sv_manage_awss3_cloudaccount', 'ansible.builtin.file']" 
+obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = modules, model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
 pred_structure = obj()
 if "{{ge" in pred_structure:
     end_ind = pred_structure.find("{{ge")
     pred_structure = pred_structure[:end_ind]
 pred_structure = pred_structure.rstrip()
 print(str(pred_structure))
-# output.append(ir_data_jsonl[i])
-#   f.write(pred_structure)
-#   f.write("-----------------------------------------") 
 print("done")
-# except Exception as e:
-#   print("failed")
-#   print(e)
-#   # ir_data_jsonl[i]["output"] = str("")
-#   # output.append(ir_data_jsonl[i])
-#   cnt_invalid += 1
-  # continue
-# df_out = pd.DataFrame(output)
-# df_out.to_parquet(output_file)
-# print(f"file saved to {output_file}")
-# print("# invalid genereations: ", cnt_invalid)
