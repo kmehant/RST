@@ -174,8 +174,8 @@ guidance.library._geneach.select_generated_id = {}
 guidance.library._geneach.iterator = None
 guidance.library._geneach.cur_iteration = None
 pred_structure = ""
-prompt = "- name: Change file ownership, group and permissions"
-obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "['ansible.builtin.file', 'ansible.builtin.command']", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
+prompt = "- name: configure aws s3 account on ibm spectrum"
+obj = nl2structure(schema = "./data_with_ft.jsonl", reference_module = "['ibm.spectrum_virtualize.ibm_sv_manage_awss3_cloudaccount', 'ansible.builtin.file']", model_class="bigcode/starcoderbase-1b", prompt=prompt, task="ansible_yaml", template=False)
 pred_structure = obj()
 if "{{ge" in pred_structure:
     end_ind = pred_structure.find("{{ge")
