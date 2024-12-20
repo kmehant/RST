@@ -10,7 +10,7 @@ model = sys.argv[1]
 tokenizer_base = AutoTokenizer.from_pretrained(model)
 model_base = AutoModelForCausalLM.from_pretrained(model, torch_dtype=torch.float16, device_map="auto")
 
-prompt = "- name: Change file ownership, group\n"
+prompt = sys.argv[2]
 
 
 try:
